@@ -5,10 +5,24 @@ void ofApp::setup(){
     
     ofEnableAlphaBlending();
     
+    fftLive.setMirrorData(false);
+    fftLive.setup();
+    
+    string guiPath = "audio.xml";
+    gui.setup("audio", guiPath, 20, 20);
+    gui.add(audioThreshold.setup("audioThreshold", 1.0, 0.0, 1.0));
+    gui.add(audioPeakDecay.setup("audioPeakDecay", 0.915, 0.0, 1.0));
+    gui.add(audioMaxDecay.setup("audioMaxDecay", 0.995, 0.0, 1.0));
+    gui.add(audioMirror.setup("audioMirror", true));
+    gui.loadFromFile(guiPath);
+
+    
     shader.load("shaders_gl3/noise");
     
     video.loadMovie( "IMG_2932.m4v" ); //Load the video file
     video.play(); //Start the video
+    
+    mesh = ofMesh::icosahedron(200);
     
     
     //setup fbo
@@ -54,6 +68,15 @@ void ofApp::setup(){
 
 //--------------------------------------------------------------
 void ofApp::update(){
+    
+    fftLive.setThreshold(audioThreshold);
+    fftLive.setPeakDecay(audioPeakDecay);
+    fftLive.setMaxDecay(audioMaxDecay);
+    fftLive.setMirrorData(audioMirror);
+    fftLive.update();
+    
+    
+    
     video.update();
     
     //convert fbo to ofImage format
@@ -99,6 +122,16 @@ void ofApp::draw(){
     ofBackground(0);
     ofSetHexColor(0xffffff);
     
+    int w = OFX_FFT_WIDTH;
+    int h = OFX_FFT_HEIGHT;
+    int x = 20;
+    int y = ofGetHeight() - h - 20;
+    fftLive.draw(x, y, w, h);
+    
+    gui.draw();
+    
+    
+    
     //video.draw(0, 0);
     
     if (video.isFrameNew()) {
@@ -135,6 +168,7 @@ void ofApp::draw(){
         //shader.begin();
         //mesh.drawWireframe();
         mesh.drawVertices();
+    //mesh.drawFaces();
         //shader.end();
 
         ofDisableAlphaBlending();
