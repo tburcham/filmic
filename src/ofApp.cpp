@@ -22,7 +22,7 @@ void ofApp::setup(){
     video.loadMovie( "IMG_2932.m4v" ); //Load the video file
     video.play(); //Start the video
     
-    mesh = ofMesh::icosahedron(200);
+    mesh = ofMesh();
     
     
     //setup fbo
@@ -56,6 +56,8 @@ void ofApp::setup(){
         }
     }
     
+    
+    meshWarped = mesh;
     
     easyCam.setDistance(1000);
     
@@ -112,8 +114,34 @@ void ofApp::update(){
             
             //Change color of vertex
             mesh.setColor(i , ofColor(255, 255, 255, alphaThreshold));
+            
+            meshWarped.setColor(i , ofColor(255, 255, 255, alphaThreshold));
         }
     }
+    
+    
+    //---------------------------------------------------------- dispacing mesh using audio.
+    vector<ofVec3f> & vertsOriginal = mesh.getVertices();
+    vector<ofVec3f> & vertsWarped = meshWarped.getVertices();
+    int numOfVerts = mesh.getNumVertices();
+    
+    float * audioData = new float[numOfVerts];
+    fftLive.getFftPeakData(audioData, numOfVerts);
+    
+    float meshDisplacement = 250;
+    
+    for(int i=0; i<numOfVerts; i++) {
+        float audioValue = audioData[i];
+        ofVec3f & vertOriginal = vertsOriginal[i];
+        ofVec3f & vertWarped = vertsWarped[i];
+        
+        ofVec3f direction = vertOriginal.getNormalized();
+        vertWarped = vertOriginal + direction * meshDisplacement * audioValue;
+    }
+    
+    delete[] audioData;
+    
+    
 }
 
 //--------------------------------------------------------------
@@ -126,7 +154,7 @@ void ofApp::draw(){
     int h = OFX_FFT_HEIGHT;
     int x = 20;
     int y = ofGetHeight() - h - 20;
-    fftLive.draw(x, y, w, h);
+    //fftLive.draw(x, y, w, h);
     
     gui.draw();
     
@@ -161,13 +189,14 @@ void ofApp::draw(){
         image.bind();
     
     
-        mesh.draw();
+        //mesh.draw();
+        meshWarped.draw();
         image.unbind();
         ofEnableAlphaBlending();
     
         //shader.begin();
-        //mesh.drawWireframe();
-        mesh.drawVertices();
+        meshWarped.drawWireframe();
+        //meshWarped.drawVertices();
     //mesh.drawFaces();
         //shader.end();
 
