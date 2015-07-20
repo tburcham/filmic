@@ -19,7 +19,7 @@ void ofApp::setup(){
     
     shader.load("shaders_gl3/noise");
     
-    video.loadMovie( "IMG_2932.m4v" ); //Load the video file
+    video.loadMovie( "elise.mov" ); //Load the video file
     video.play(); //Start the video
     
     mesh = ofMesh();
@@ -107,10 +107,10 @@ void ofApp::update(){
             p.z = brightness; // ofNoise(x * 0.05, y * 0.05, ofGetElapsedTimef() * 0.5) * 100;
             mesh.setVertex( i, p );
             
-            float alphaThreshold = brightness * 1;
-            if (alphaThreshold < 150) {
+            float alphaThreshold = 255 - (brightness * 1);
+            /*if (alphaThreshold < 150) {
                 alphaThreshold = 0;
-            }
+            }*/
             
             //Change color of vertex
             mesh.setColor(i , ofColor(255, 255, 255, alphaThreshold));

@@ -45,8 +45,8 @@ class ofApp : public ofBaseApp{
     
         private:
     
-            int videoWidth = 720;
-            int videoHeight = 480;
+            int videoWidth = 320;
+            int videoHeight = 568;
     
             float factor = 0.5;
     
