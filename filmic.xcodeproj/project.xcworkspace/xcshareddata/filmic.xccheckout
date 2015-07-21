@@ -7,14 +7,14 @@
 	<key>IDESourceControlProjectIdentifier</key>
 	<string>53063F06-BA48-43CA-8C06-8E17041B9814</string>
 	<key>IDESourceControlProjectName</key>
-	<string>filmic</string>
+	<string>project</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>22AD1ACC6E1ED06627F256485A0301DCA0F3711C</key>
 		<string>https://github.com/tburcham/filmic.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>filmic.xcodeproj</string>
+	<string>filmic.xcodeproj/project.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>22AD1ACC6E1ED06627F256485A0301DCA0F3711C</key>

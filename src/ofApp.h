@@ -30,12 +30,26 @@ class ofApp : public ofBaseApp{
         ofxSlider<float> audioPeakDecay;
         ofxSlider<float> audioMaxDecay;
         ofxToggle audioMirror;
-        
+    
+        ofxToggle meshToggle;
+        ofxSlider<float> meshThreshold;
+        ofxSlider<float> alphaVideoSmoothing;
+        ofxSlider<float> audioMeshDisplacement;
+        ofxSlider<float> brightnessDisplacement;
+    
+        ofxToggle baseVideoToggle;
+        ofxToggle warpedVideoToggle;
+        ofxToggle verticesToggle;
+        ofxToggle facesToggle;
+        ofxToggle invertMeshColors;
+    
         ofMesh meshOriginal;
         ofMesh meshWarped;
 
     
         ofVideoPlayer video; //Prerecorded video
+        ofVideoGrabber 		vidGrabber;
+    
         ofFbo fbo;
         ofMesh mesh;
         ofImage image;
@@ -47,6 +61,9 @@ class ofApp : public ofBaseApp{
     
             int videoWidth = 320;
             int videoHeight = 568;
+    
+    int 				camWidth;
+    int 				camHeight;
     
             float factor = 0.5;
     

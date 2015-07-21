@@ -14,12 +14,22 @@ void ofApp::setup(){
     gui.add(audioPeakDecay.setup("audioPeakDecay", 0.915, 0.0, 1.0));
     gui.add(audioMaxDecay.setup("audioMaxDecay", 0.995, 0.0, 1.0));
     gui.add(audioMirror.setup("audioMirror", true));
+    gui.add(baseVideoToggle.setup("baseVideoToggle", false));
+    gui.add(warpedVideoToggle.setup("warpedVideoToggle", true));
+    gui.add(verticesToggle.setup("verticesToggle", false));
+    gui.add(facesToggle.setup("facesToggle", false));
+    gui.add(meshToggle.setup("meshToggle", true));
+    gui.add(invertMeshColors.setup("invertMeshColors", false));
+    gui.add(meshThreshold.setup("meshThreshold", 0.0, 0.0, 255.0));
+    gui.add(alphaVideoSmoothing.setup("alphaVideoSmoothing", 50.0, 0.0, 255.0));
+    gui.add(audioMeshDisplacement.setup("audioMeshDisplacement", 250.0, 0.0, 250.0));
+    gui.add(brightnessDisplacement.setup("brightnessDisplacement", 2.0, 0.0, 5.0));
     gui.loadFromFile(guiPath);
 
     
     shader.load("shaders_gl3/noise");
     
-    video.loadMovie( "elise.mov" ); //Load the video file
+    video.loadMovie( "claw.m4v" ); //Load the video file
     video.play(); //Start the video
     
     mesh = ofMesh();
@@ -64,6 +74,9 @@ void ofApp::setup(){
     easyCam.setNearClip(0);
     easyCam.setFarClip(10000);
     
+    //easyCam.orbit(0, 0, 1000);
+    //easyCam.
+    //easyCam.rotateAround(360.0, ofVec3f(0, 1000), ofVec3f(0, 0));
     
     
 }
@@ -93,12 +106,17 @@ void ofApp::update(){
             int i = x + W * y;
             ofPoint p = mesh.getVertex( i );
             
+            ofColor imgColor = image.getColor(x, y);
+            if (invertMeshColors) {
+                imgColor = imgColor.invert();
+            }
+            
             float scaleX = videoWidth / W;
             float scaleY = videoHeight / H;
             
             // get brightness
             int index = ((x * scaleX) + videoWidth * (y * scaleY)) * 4; // FBO has four components (including Alpha)
-            float brightness = (fboPixels[index] * 2); // 4 is an arbitrary scalar to reduce the amount of distortion
+            float brightness = (fboPixels[index] * brightnessDisplacement);
             
             //printf("z value is %f\n", brightness / 255.0);
             //printf("Maximum number of output vertices support is: %i\n", shader.getGeometryMaxOutputCount());
@@ -107,15 +125,21 @@ void ofApp::update(){
             p.z = brightness; // ofNoise(x * 0.05, y * 0.05, ofGetElapsedTimef() * 0.5) * 100;
             mesh.setVertex( i, p );
             
-            float alphaThreshold = 255 - (brightness * 1);
-            /*if (alphaThreshold < 150) {
+            float alphaThreshold = brightness * 1;
+            if (meshToggle) {
+                alphaThreshold = 255 - alphaThreshold;
+            }
+            
+            
+            if (alphaThreshold < meshThreshold) {
                 alphaThreshold = 0;
-            }*/
+            }
             
             //Change color of vertex
             mesh.setColor(i , ofColor(255, 255, 255, alphaThreshold));
             
-            meshWarped.setColor(i , ofColor(255, 255, 255, alphaThreshold));
+            
+            meshWarped.setColor(i , ofColor(imgColor.r, imgColor.g, imgColor.b, alphaThreshold));
         }
     }
     
@@ -128,7 +152,7 @@ void ofApp::update(){
     float * audioData = new float[numOfVerts];
     fftLive.getFftPeakData(audioData, numOfVerts);
     
-    float meshDisplacement = 250;
+    float meshDisplacement = audioMeshDisplacement;
     
     for(int i=0; i<numOfVerts; i++) {
         float audioValue = audioData[i];
@@ -166,7 +190,7 @@ void ofApp::draw(){
         // draw video into fbo
         fbo.begin();
         
-        int alpha = 50; // amount of smoothing
+        int alpha = alphaVideoSmoothing; // amount of smoothing
         ofEnableAlphaBlending();
         ofSetColor(255, 255, 255, alpha);
         
@@ -183,21 +207,32 @@ void ofApp::draw(){
         ofPushMatrix(); //Store the coordinate system
     
         //Move the coordinate center to screen's center
-        ofTranslate( ofGetWidth()/2, ofGetHeight()/2, 0 );
+        //ofTranslate( ofGetWidth()/2, ofGetHeight()/2, 0 );
+        ofTranslate(0, 0, 0);
         //Draw mesh
     
         image.bind();
     
+        if (baseVideoToggle) {
+            mesh.draw();
+        }
+        if (warpedVideoToggle) {
+            meshWarped.draw();
+        }
     
-        //mesh.draw();
-        meshWarped.draw();
         image.unbind();
         ofEnableAlphaBlending();
     
         //shader.begin();
         meshWarped.drawWireframe();
-        //meshWarped.drawVertices();
-    //mesh.drawFaces();
+    
+        if (verticesToggle) {
+            meshWarped.drawVertices();
+        }
+        if (facesToggle) {
+            meshWarped.drawFaces();
+        }
+    
         //shader.end();
 
         ofDisableAlphaBlending();
